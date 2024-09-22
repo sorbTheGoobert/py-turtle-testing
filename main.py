@@ -1,77 +1,133 @@
 from turtle import Turtle, _CFG
 import random
 
-def drawStar(t, size, op):
-    ogHeading = t.heading()
-    t.penup()
-    t.forward(size * 144 / 100)
-    t.right(90 + 72)
-    t.pendown()
-    t.begin_fill()
-    for i in range(5):
-        t.forward(size)
-        t.left(72)
-        t.forward(size)
-        t.right(72 * 2)
-    t.end_fill()
-    t.setheading(ogHeading)
-    t.penup()
-    t.backward(size * 144 / 100)
-    t.pendown()
+# def drawStar(t, size, op):
+#     ogHeading = t.heading()
+#     t.penup()
+#     t.forward(size * 144 / 100)
+#     t.right(90 + 72)
+#     t.pendown()
+#     t.begin_fill()
+#     for i in range(5):
+#         t.forward(size)
+#         t.left(72)
+#         t.forward(size)
+#         t.right(72 * 2)
+#     t.end_fill()
+#     t.setheading(ogHeading)
+#     t.penup()
+#     t.backward(size * 144 / 100)
+#     t.pendown()
+
+class AfterImage:
+    def __init__(self, pos, heading, color, colorspeed, tutel):
+        self.artist = tutel()
+        self.heading = heading
+        self.color = {
+            "current": {"r": color["r"], "g": color["g"], "b": color["b"]},
+            "speed": colorspeed
+        }
+        self.pos = {"x": pos["x"], "y": pos["y"]}
+    def update(self):
+        pass
+
+class Star:
+    def __init__(self, pos, size, speed, heading, tutel, colorspeed):
+        self.artist = tutel()
+        self.rotation = {
+            "speed": speed,
+            "heading": heading
+        }
+        if pos == None:
+            self.pos = {"x": 0, "y": 0}
+        else:
+            self.pos = {"x": pos["x"], "y": pos["y"]}
+        self.size = size
+        self.color = {
+            "current": {
+                "r": random.randint(0, 255), "g": random.randint(0, 255), "b": random.randint(0, 255)
+            },
+            "mod": {
+                "r": random.choice([colorspeed, -colorspeed]), "g": random.choice([colorspeed, -colorspeed]), "b": random.choice([colorspeed, -colorspeed])
+            }
+        }
+    def update(self):
+        self.artist.screen.tracer(0)
+        self.artist.screen.title("ASRIEL HOLY CRAP")
+        self.artist.screen.colormode(255)
+        self.artist.seth(self.rotation["heading"])
+        self.artist.screen.delay(1000 / 60)
+        self.artist.speed(0)
+        r = self.color["current"]["r"]
+        g = self.color["current"]["g"]
+        b = self.color["current"]["b"]
+        self.artist.setpos((self.pos["x"], self.pos["y"]))
+        self.artist.pen(fillcolor=((r, g, b)), pencolor=((r, g, b)), pensize=1)
+
+        ogHeading = self.artist.heading()
+        self.artist.penup()
+        self.artist.forward(self.size * 144 / 100)
+        self.artist.right(90 + 72)
+        self.artist.pendown()
+        self.artist.begin_fill()
+        for i in range(5):
+            self.artist.forward(self.size)
+            self.artist.left(72)
+            self.artist.forward(self.size)
+            self.artist.right(72 * 2)
+        self.artist.end_fill()
+        self.artist.setheading(ogHeading)
+        self.artist.penup()
+        self.artist.backward(self.size * 144 / 100)
+        self.artist.pendown()
+
+        r += self.color["mod"]["r"]
+        g += self.color["mod"]["g"]
+        b += self.color["mod"]["b"]
+        if r > 255 or r < 0:
+            self.color["mod"]["r"] *= -1
+            r += self.color["mod"]["r"]
+        if g > 255 or g < 0:
+            self.color["mod"]["g"] *= -1
+            g += self.color["mod"]["g"]
+        if b > 255 or b < 0:
+            self.color["mod"]["b"] *= -1
+            b += self.color["mod"]["b"]
+        self.color["current"]["r"] = r
+        self.color["current"]["g"] = g
+        self.color["current"]["b"] = b
+
+        self.rotation["heading"] += self.rotation["speed"]
+        self.artist.screen.update()
+        self.artist.clear()
 
 def main():
-    
+
+    # # Init tutel
+    # tutel = Turtle()
+    # tutel.screen.tracer(0)
+    # tutel.screen.title("ASRIEL HOLY CRAP")
+    # tutel.screen.delay(0)
+    # tutel.speed(0)
+    # tutel.seth(90)
+    # tutel.screen.colormode(255)
+    # r, g, b= random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)
+    # mod = [random.randint(3, 6), random.randint(3, 6), random.randint(3, 6)]
+
+    # newTutel = Star({"x": 100, "y": 100}, 250, 2)
+    # print(newTutel.color["mod"]["r"])
+
+    # tutel.pen(fillcolor=((r, g, b)), pencolor=((r, g, b)), pensize=1)
+    # random.seed()
+    # tutel.screen.colormode(255)
+    # tutel.screen.bgcolor(0, 0, 0)
+
     # Init tutel
-    tutel = Turtle()
-    tutel.screen.tracer(0)
-    tutel.screen.title("ASRIEL HOLY CRAP")
-    tutel.screen.delay(0)
-    tutel.speed(0)
-    tutel.seth(90)
-    tutel.screen.colormode(255)
-    # tutel.hideturtle()
-    r, g, b= random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)
-    # r, g, b, a = 255, 255, 255, 1
-    mod = [random.randint(3, 6), random.randint(3, 6), random.randint(3, 6)]
-    print(mod)
-    # tutel.fillcolor((r, g, b))
-    tutel.pen(fillcolor=((r, g, b)), pencolor=((r, g, b)), pensize=1)
-    # try:
-    #     tutel.pencolor(128, 255, 128 ,0.5)
-    # except:
-    #     raise Exception("Nah NO ALPHA")
+    tutel = Star(pos=None, size=250, speed=0.25, heading=90.0, tutel=Turtle, colorspeed=1)
     random.seed()
-    tutel.screen.colormode(255)
-    tutel.screen.bgcolor(0, 0, 0)
-    
+
     while True:
-        tutel.right(1)
-        r += mod[0]
-        g += mod[1]
-        b += mod[2]
-        if r > 255 or r < 0:
-            mod[0] *= -1
-            r += mod[0]
-        if g > 255 or g < 0:
-            mod[1] *= -1
-            g += mod[1]
-        if b > 255 or b < 0:
-            mod[2] *= -1
-            b += mod[2]
-        tutel.pen(fillcolor=((r, g, b)), pencolor=((r, g, b)), pensize=1)
-        temphead = tutel.heading()
-        n = 10
-        delta = [int(r / n), int(g / n), int(b / n)]
-        for star in range(n):
-            tutel.pen(fillcolor=(delta[0] * (star + 1), delta[1] * (star + 1), delta[2] * (star + 1)), pencolor=(delta[0] * (star + 1), delta[1] * (star + 1), delta[2] * (star + 1)), pensize=1)
-            drawStar(t=tutel, size=250, op=1)
-            tutel.right(5)
-        # drawStar(t=tutel, size=250, op=1)
-        tutel.seth(temphead)
-        tutel.screen.update()
-        # time.sleep(0.05)
-        # time.slee)
-        tutel.clear()
-        
+        tutel.update()
+
 
 main()
