@@ -1,5 +1,5 @@
 from turtle import Turtle, _CFG
-import random
+import random, datetime
 
 # def drawStar(t, size, op):
 #     ogHeading = t.heading()
@@ -37,11 +37,8 @@ class Star:
         self.rotation = {
             "speed": speed,
             "heading": heading
-        }
-        if pos == None:
-            self.pos = {"x": 0, "y": 0}
-        else:
-            self.pos = {"x": pos["x"], "y": pos["y"]}
+        }    
+        self.pos = {"x": pos["x"], "y": pos["y"]}
         self.size = size
         self.color = {
             "current": {
@@ -51,7 +48,24 @@ class Star:
                 "r": random.choice([colorspeed, -colorspeed]), "g": random.choice([colorspeed, -colorspeed]), "b": random.choice([colorspeed, -colorspeed])
             }
         }
+        self.dt = 0
+        self.time = {
+            "before": int(datetime.datetime.now().strftime("%f")) / 1000 , 
+            "after": int(datetime.datetime.now().strftime("%f")) / 1000 
+        }
+        self.done = False
     def update(self):
+        self.time["after"] = int(datetime.datetime.now().strftime("%f")) / 1000 # So the %f formatter takes date in "microseconds", or in other words 1 / 1000 of a MILLISECOND
+        self.dt = abs(self.time["after"] - self.time["before"])
+        print(self.time["before"], type(self.time["before"]))
+        print(self.time["after"], type(self.time["after"]))
+        print(self.dt)
+        print(self.rotation["speed"] * self.dt)
+        print(self.artist.heading())
+        print((self.artist.heading() + self.rotation["speed"] * self.dt) % 360)
+        print("##############################\n")
+        
+        # Initialize some stuff
         self.artist.screen.tracer(0)
         self.artist.screen.title("ASRIEL HOLY CRAP")
         self.artist.screen.colormode(255)
@@ -64,11 +78,13 @@ class Star:
         self.artist.setpos((self.pos["x"], self.pos["y"]))
         self.artist.pen(fillcolor=((r, g, b)), pencolor=((r, g, b)), pensize=1)
 
+        # Actually draw the stuff
         ogHeading = self.artist.heading()
         self.artist.penup()
         self.artist.forward(self.size * 144 / 100)
         self.artist.right(90 + 72)
         self.artist.pendown()
+        self.artist.dot(50, "blue")
         self.artist.begin_fill()
         for i in range(5):
             self.artist.forward(self.size)
@@ -97,9 +113,18 @@ class Star:
         self.color["current"]["g"] = g
         self.color["current"]["b"] = b
 
-        self.rotation["heading"] += self.rotation["speed"]
+        self.time["before"] = self.time["after"]
+
+        self.rotation["heading"] += self.rotation["speed"] * self.dt
+        # self.rotation["heading"] += self.rotation["speed"]
+        self.rotation["heading"] %= 360
         self.artist.screen.update()
-        self.artist.clear()
+        
+        try:
+            self.artist.clear()
+        except:
+            self.done = True
+        
 
 def main():
 
@@ -123,10 +148,10 @@ def main():
     # tutel.screen.bgcolor(0, 0, 0)
 
     # Init tutel
-    tutel = Star(pos=None, size=250, speed=0.25, heading=90.0, tutel=Turtle, colorspeed=1)
+    tutel = Star(pos={"x": 0, "y": 0}, size=250, speed=0.25, heading=90.0, tutel=Turtle, colorspeed=1)
     random.seed()
 
-    while True:
+    while not tutel.done:
         tutel.update()
 
 
