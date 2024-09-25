@@ -51,12 +51,15 @@ class Star:
         self.dt = 0
         self.time = {
             "before": int(datetime.datetime.now().strftime("%f")) / 1000 , 
-            "after": int(datetime.datetime.now().strftime("%f")) / 1000 
+            "after": int(datetime.datetime.now().strftime("%f")) / 1000 ,
+            "lowest": 1000 / 10,
+            "highest": 1000 / 60
         }
         self.done = False
     def update(self):
         self.time["after"] = int(datetime.datetime.now().strftime("%f")) / 1000 # So the %f formatter takes date in "microseconds", or in other words 1 / 1000 of a MILLISECOND
         self.dt = abs(self.time["after"] - self.time["before"])
+        self.dt = min(max(self.time["lowest"], self.dt), self.time["highest"])
         print(self.time["before"], type(self.time["before"]))
         print(self.time["after"], type(self.time["after"]))
         print(self.dt)
@@ -148,7 +151,7 @@ def main():
     # tutel.screen.bgcolor(0, 0, 0)
 
     # Init tutel
-    tutel = Star(pos={"x": 0, "y": 0}, size=250, speed=0.25, heading=90.0, tutel=Turtle, colorspeed=1)
+    tutel = Star(pos={"x": 0, "y": 0}, size=150, speed=0.05, heading=90.0, tutel=Turtle, colorspeed=1)
     random.seed()
 
     while not tutel.done:
