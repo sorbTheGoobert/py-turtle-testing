@@ -1,27 +1,9 @@
 from turtle import Turtle, _CFG
 import random, datetime
 
-# def drawStar(t, size, op):
-#     ogHeading = t.heading()
-#     t.penup()
-#     t.forward(size * 144 / 100)
-#     t.right(90 + 72)
-#     t.pendown()
-#     t.begin_fill()
-#     for i in range(5):
-#         t.forward(size)
-#         t.left(72)
-#         t.forward(size)
-#         t.right(72 * 2)
-#     t.end_fill()
-#     t.setheading(ogHeading)
-#     t.penup()
-#     t.backward(size * 144 / 100)
-#     t.pendown()
-
 class AfterImage:
     def __init__(self, pos, heading, color, colorspeed, tutel, size):
-        self.artist = tutel
+        self.artist = tutel()
         self.size = size
         self.heading = heading
         self.color = {
@@ -30,6 +12,7 @@ class AfterImage:
         }
         self.pos = {"x": pos["x"], "y": pos["y"]}
         self.done = True
+
     def create(self, currentHeading, color):
         self.heading = currentHeading
         self.color["current"]["r"] = color["r"]
@@ -37,8 +20,10 @@ class AfterImage:
         self.color["current"]["b"] = color["b"]
         self.done = False
         self.update()
+
     def draw(self):
         # Actually draw the stuff
+        self.artist.setpos(self.pos["x"], self.pos["y"])
         ogHeading = self.artist.heading()
         self.artist.penup()
         self.artist.forward(self.size * 144 / 100)
@@ -55,15 +40,15 @@ class AfterImage:
         self.artist.penup()
         self.artist.backward(self.size * 144 / 100)
         self.artist.pendown()
+
     def update(self):
         self.draw()
-        self.color["current"]["r"]+=min(self.color["current"]["r"] + self.color["speed"], 255)
-        self.color["current"]["g"]+=min(self.color["current"]["g"] + self.color["speed"], 255)
-        self.color["current"]["b"]+=min(self.color["current"]["b"] + self.color["speed"], 255)
+        self.color["current"]["r"] = min(self.color["current"]["r"] + self.color["speed"], 255)
+        self.color["current"]["g"] = min(self.color["current"]["g"] + self.color["speed"], 255)
+        self.color["current"]["b"] = min(self.color["current"]["b"] + self.color["speed"], 255)
         self.done = self.color["current"]["r"] == 255 and self.color["current"]["g"] == 255 and self.color["current"]["b"] == 255
-
 class Star:
-    def __init__(self, pos, size, speed, heading, tutel, colorspeed, afterimageCount):
+    def __init__(self, pos, size, speed, heading, tutel, colorspeed, afterimageCount, spawntimer):
         self.artist = tutel()
         self.rotation = {
             "speed": speed,
@@ -88,17 +73,31 @@ class Star:
         }
         self.done = False
         self.afterImages = []
-        for _ in range(afterimageCount):
-            self.afterImages.append(AfterImage(pos=pos, heading=heading, color=self.color["current"], colorspeed=colorspeed, tutel=self.artist, size=size))
+        for i in range(afterimageCount):
+            self.afterImages.append(AfterImage(pos=pos, heading=heading, color=self.color["current"], colorspeed=colorspeed, tutel=tutel, size=size))
+        self.timer = {
+            "main": spawntimer,
+            "current": spawntimer
+        }
+    
     def drawAfterImages(self):
+        if self.timer["current"] >= 0:
+            self.timer["current"]-=1
+            return
+        
         for afterImage in self.afterImages:
-            if afterImage.done:
+            if afterImage.done and self.timer["current"] <= 0:
                 afterImage.create(self.rotation["heading"], self.color["current"])
+                self.timer["current"] = self.timer["main"]
             else:
                 afterImage.update()
+
     def draw(self):
         # Actually draw the stuff
+        ogPos = self.artist.pos()
         ogHeading = self.artist.heading()
+        self.artist.pen(fillcolor=((self.color["current"]["r"], self.color["current"]["g"], self.color["current"]["b"])), pencolor=((self.color["current"]["r"], self.color["current"]["g"], self.color["current"]["b"])), pensize=1)
+        self.artist.setpos((self.pos["x"], self.pos["y"]))
         self.artist.penup()
         self.artist.forward(self.size * 144 / 100)
         self.artist.right(90 + 72)
@@ -114,6 +113,7 @@ class Star:
         self.artist.penup()
         self.artist.backward(self.size * 144 / 100)
         self.artist.pendown()
+        self.artist.setpos(ogPos)
     def update(self):
         self.time["after"] = int(datetime.datetime.now().strftime("%f")) / 1000 # So the %f formatter takes date in "microseconds", or in other words 1 / 1000 of a MILLISECOND
         self.dt = abs(self.time["after"] - self.time["before"])
@@ -193,7 +193,7 @@ def main():
     # tutel.screen.bgcolor(0, 0, 0)
 
     # Init tutel
-    tutel = Star(pos={"x": 0, "y": 0}, size=150, speed=0.05, heading=90.0, tutel=Turtle, colorspeed=1, afterimageCount=10)
+    tutel = Star(pos={"x": 0, "y": 0}, size=150, speed=0.05, heading=90.0, tutel=Turtle, colorspeed=1, afterimageCount=10, spawntimer=1*60)
     random.seed()
 
     while not tutel.done:
